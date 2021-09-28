@@ -154,7 +154,11 @@ def write_metrics(engine, schema_name, metric, dataframe):
     with engine.connect() as con:
         print(f"Inserting {dataframe.dropna(axis=1).dropna().shape[0]} rows.")
         dataframe.dropna(axis=1).dropna().replace("", None).to_sql(
-            table_name, con=con, if_exists="append", index=False
+            table_name,
+            con=con,
+            schema=schema_name,
+            if_exists="append",
+            index=False,
         )
 
 
