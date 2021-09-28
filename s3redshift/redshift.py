@@ -178,6 +178,9 @@ metrics = todays_df.metric.unique()
 
 db = sqlalchemy.create_engine(REDSHIFT_DATABASE_URI)
 
+skipped_metrics = ["count_filtered_users_by_account"]
 for metric in metrics:
+    if metric in skipped_metrics:
+        continue
     metric_df = todays_df.loc[todays_df["metric"] == metric].dropna(axis=1)
     write_metrics(db, REDSHIFT_SCHEMA, metric, metric_df)
