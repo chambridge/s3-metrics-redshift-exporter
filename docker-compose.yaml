@@ -1,0 +1,18 @@
+version: "3"
+
+volumes:
+  postgres_data:
+      driver: local
+
+services:
+
+  redshift:
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: rhdsrs
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+      ports:
+        - 5439:5432
