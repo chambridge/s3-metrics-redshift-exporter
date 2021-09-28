@@ -128,7 +128,7 @@ def get_column_datatype(column_name):
 
 def create_table(engine, schema_name, name, *cols):
     meta = MetaData(schema=schema_name)
-    table = Table(name, meta, *cols)
+    table = Table(name, meta, *cols, schema=schema_name)
     table.create(engine, checkfirst=True)
 
     stmt = f"grant ALL on {schema_name}.{name} to group rsds_pnt_rw;"
