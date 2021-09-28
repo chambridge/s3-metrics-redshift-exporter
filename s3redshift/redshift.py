@@ -163,6 +163,9 @@ def write_metrics(engine, schema_name, metric, dataframe):
 
 
 df = pd_read_s3_multiple_parquets("metrics", bucket)
+mask = df.applymap(type) != bool
+d = {True: "true", False: "false"}
+df = df.where(mask, df.replace(d))
 
 todays_date = date.today()
 todays_df = df.loc[
