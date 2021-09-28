@@ -26,6 +26,7 @@ DB_ENGINE = os.getenv("DATABASE_ENGINE", "postgresql")
 REDSHIFT_HOST = os.getenv("REDSHIFT_HOST")
 REDSHIFT_PORT = os.getenv("REDSHIFT_PORT")
 REDSHIFT_DB = os.getenv("REDSHIFT_DB")
+REDSHIFT_SCHEMA = os.getenv("REDSHIFT_SCHEMA")
 REDSHIFT_TABLE_PREFIX = os.getenv("REDSHIFT_TABLE_PREFIX", "koku")
 REDSHIFT_USER = os.getenv("REDSHIFT_USER")
 REDSHIFT_PASSWORD = os.getenv("REDSHIFT_PASSWORD")
@@ -125,8 +126,8 @@ def get_column_datatype(column_name):
     return data_type
 
 
-def create_table(engine, name, *cols):
-    meta = MetaData()
+def create_table(engine, schema_name, name, *cols):
+    meta = MetaData(schema=schema_name)
     meta.reflect(bind=engine)
     if name in meta.tables:
         return
@@ -135,7 +136,7 @@ def create_table(engine, name, *cols):
     table.create(engine)
 
 
-def write_metrics(engine, metric, dataframe):
+def write_metrics(engine, schema_name, metric, dataframe):
     table_prefix = REDSHIFT_TABLE_PREFIX
     table_name = f"{table_prefix}_{metric}"
 
@@ -145,7 +146,7 @@ def write_metrics(engine, metric, dataframe):
         col_obj = Column(col, get_column_datatype(col), nullable=True)
         columns.append(col_obj)
 
-    create_table(engine, table_name, *columns)
+    create_table(engine, schema_name, table_name, *columns)
 
     print(f"Inserting data into table={table_name}.")
     with engine.connect() as con:
@@ -170,4 +171,4 @@ db = sqlalchemy.create_engine(REDSHIFT_DATABASE_URI)
 
 for metric in metrics:
     metric_df = todays_df.loc[todays_df["metric"] == metric].dropna(axis=1)
-    write_metrics(db, metric, metric_df)
+    write_metrics(db, REDSHIFT_SCHEMA, metric, metric_df)
