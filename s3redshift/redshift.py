@@ -128,12 +128,14 @@ def get_column_datatype(column_name):
 
 def create_table(engine, schema_name, name, *cols):
     meta = MetaData(schema=schema_name)
-    meta.reflect(bind=engine)
-    if name in meta.tables:
-        return
-
     table = Table(name, meta, *cols)
-    table.create(engine)
+    table.create(engine, checkfirst=True)
+
+    stmt = f"grant ALL on {schema_name}.{name} to group rsds_pnt_rw;"
+    stmt += f"grant SELECT on {schema_name}.{name} to group rsds_pnt_ro;"
+    stmt = "commit;"
+    with engine.connect() as con:
+        con.execute(stmt)
 
 
 def write_metrics(engine, schema_name, metric, dataframe):
