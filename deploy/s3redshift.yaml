@@ -1,0 +1,88 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: s3redshift
+spec:
+  schedule: "0 18 * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: s3redshift
+            image: quay.io/chambrid/s3redshift:latest
+            command: ["python", "s3redshift/redshift.py"]
+            env:
+              - name: S3_ENDPOINT
+                valueFrom:
+                  secretKeyRef:
+                    key: endpoint
+                    name: cost-ceph
+                    optional: false
+              - name: AWS_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: access_key
+                    name: cost-ceph
+                    optional: false
+              - name: AWS_SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: secret_key
+                    name: cost-ceph
+                    optional: false
+              - name: S3_BUCKET
+                valueFrom:
+                  secretKeyRef:
+                    key: bucket
+                    name: cost-ceph
+                    optional: false
+              - name: S3_BUCKET_PREFIX
+                valueFrom:
+                  secretKeyRef:
+                    key: bucket_prefix
+                    name: cost-ceph
+                    optional: false
+              - name: REDSHIFT_HOST
+                valueFrom:
+                  secretKeyRef:
+                    key: host
+                    name: cost-redshift
+                    optional: false
+              - name: REDSHIFT_PORT
+                valueFrom:
+                  secretKeyRef:
+                    key: port
+                    name: cost-redshift
+                    optional: false
+              - name: REDSHIFT_DB
+                valueFrom:
+                  secretKeyRef:
+                    key: db
+                    name: cost-redshift
+                    optional: false
+              - name: REDSHIFT_SCHEMA
+                valueFrom:
+                  secretKeyRef:
+                    key: schema
+                    name: cost-redshift
+                    optional: false
+              - name: REDSHIFT_USER
+                valueFrom:
+                  secretKeyRef:
+                    key: user
+                    name: cost-redshift
+                    optional: false
+              - name: REDSHIFT_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    key: password
+                    name: cost-redshift
+                    optional: false
+              - name: REDSHIFT_TABLE_PREFIX
+                valueFrom:
+                  secretKeyRef:
+                    key: table_prefix
+                    name: cost-redshift
+                    optional: false
+          restartPolicy: OnFailure
