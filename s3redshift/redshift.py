@@ -178,7 +178,11 @@ metrics = todays_df.metric.unique()
 
 db = sqlalchemy.create_engine(REDSHIFT_DATABASE_URI)
 
-skipped_metrics = ["count_filtered_users_by_account"]
+skipped_metrics = [
+    "count_filtered_users_by_account",
+    "list_filtered_accounts",
+    "count_filtered_users_by_domain",
+]
 for metric in metrics:
     if metric in skipped_metrics:
         continue
