@@ -2,6 +2,7 @@ import io
 import os
 import re
 from datetime import date
+from datetime import datetime
 
 import boto3
 import pandas as pd
@@ -168,6 +169,11 @@ d = {True: "true", False: "false"}
 df = df.where(mask, df.replace(d))
 
 todays_date = date.today()
+date_override = os.getenv("DATE_OVERRIDE")
+if date_override:
+    format = "%Y-%m-%d"
+    todays_date = datetime.strptime(date_override, format)
+
 todays_df = df.loc[
     (df["year"] == f"{todays_date.year}")
     & (df["month"] == f"{todays_date.month}")
