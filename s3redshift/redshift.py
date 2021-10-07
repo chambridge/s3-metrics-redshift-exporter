@@ -188,6 +188,7 @@ skipped_metrics = [
     "count_filtered_users_by_account",
     "list_filtered_accounts",
     "count_filtered_users_by_domain",
+    "count_errored_clusters",
 ]
 for metric in metrics:
     if metric in skipped_metrics:
