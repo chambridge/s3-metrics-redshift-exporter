@@ -176,6 +176,8 @@ df = pd_read_s3_multiple_parquets("metrics", bucket, todays_date)
 mask = df.applymap(type) != bool
 d = {True: "true", False: "false"}
 df = df.where(mask, df.replace(d))
+if "additional_context" in df.columns:
+    df.drop("additional_context", axis=1, inplace=True)
 
 todays_df = df.loc[
     (df["year"] == f"{todays_date.year}")
@@ -192,6 +194,7 @@ skipped_metrics = [
     "list_filtered_accounts",
     "count_filtered_users_by_domain",
     "count_errored_clusters",
+    "invalid_sources",
 ]
 for metric in metrics:
     if metric in skipped_metrics:
