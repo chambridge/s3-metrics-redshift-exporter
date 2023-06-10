@@ -3,6 +3,7 @@ import os
 import re
 from datetime import date
 from datetime import datetime
+from datetime import timedelta
 
 import boto3
 import pandas as pd
@@ -178,7 +179,7 @@ def write_metrics(engine, schema_name, metric, dataframe):
         )
 
 
-todays_date = date.today()
+todays_date = date.today() - timedelta(days=1)
 date_override = os.getenv("DATE_OVERRIDE")
 if date_override:
     format = "%Y-%m-%d"
