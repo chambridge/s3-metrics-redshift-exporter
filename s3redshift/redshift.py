@@ -44,6 +44,7 @@ def get_s3_client():
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
         endpoint_url=f"https://{s3_endpoint}",
+        verify=False,
     )
     return s3_client
 
@@ -54,6 +55,7 @@ def get_s3_resource():
         endpoint_url=f"https://{s3_endpoint}",
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
+        verify=False,
     )
     return s3
 
@@ -86,13 +88,18 @@ def pd_read_s3_multiple_parquets(
     partition_filter = f"/year={partition_filter_date.year}/month={partition_filter_date.month}/day={partition_filter_date.day}/"  # noqa
     if not filepath.endswith("/"):
         filepath = filepath + "/"  # Add '/' to the end
+
+    for item in s3.Bucket(bucket).objects.filter(Prefix=filepath):
+        if partition_filter in item.key:
+            print(item.key)
+
     s3_keys = [
         item.key
         for item in s3.Bucket(bucket).objects.filter(Prefix=filepath)
         if item.key.endswith(".parquet") and (partition_filter in item.key)
     ]
     if not s3_keys:
-        print("No parquet found in", bucket, filepath)
+        print("No parquet found in", bucket, filepath, partition_filter)
     elif verbose:
         print("Load parquets:")
         for p in s3_keys:
@@ -149,8 +156,13 @@ def write_metrics(engine, schema_name, metric, dataframe):
     print(f"Creating table={table_name} if it doesn't exist.")
     columns = []
     for col in dataframe.dropna(axis=1).columns:
-        col_obj = Column(col, get_column_datatype(col), nullable=True)
+        data_type = get_column_datatype(col)
+        col_obj = Column(col, data_type, nullable=True)
         columns.append(col_obj)
+        if data_type == DateTime:
+            dataframe[col] = pd.to_datetime(dataframe[col]).dt.tz_localize(
+                None
+            )
 
     create_table(engine, schema_name, table_name, *columns)
 
